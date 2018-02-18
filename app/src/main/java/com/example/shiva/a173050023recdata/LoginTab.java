@@ -15,13 +15,59 @@ import java.util.regex.Pattern;
 
 public class LoginTab extends Fragment implements View.OnClickListener {
 
+    View rootView;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        ((MainActivity)getActivity()).loadLoginFrag();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(R.layout.activity_login_tab, container, false);
+        rootView =  inflater.inflate(R.layout.activity_login_tab, container, false);
         rootView.findViewById(R.id.male).setOnClickListener(this);
         rootView.findViewById(R.id.female).setOnClickListener(this);
         rootView.findViewById(R.id.others).setOnClickListener(this);
+
+
+
         return rootView;
+    }
+
+    public String[] getTextViewText(){
+        EditText fname =  rootView.findViewById(R.id.first_name);
+        EditText lname =  rootView.findViewById(R.id.last_name);
+        EditText contact =  rootView.findViewById(R.id.contact);
+        EditText email =  rootView.findViewById(R.id.email);
+        EditText age =  rootView.findViewById(R.id.age);
+        String[] texts = {fname.getText().toString(), lname.getText().toString(), contact.getText().toString(), email.getText().toString(), age.getText().toString()};
+        return texts;
+    }
+
+    public int getRadioClicked(){
+        RadioGroup radioGroup =  rootView.findViewById(R.id.radio_gender);
+        return radioGroup.getCheckedRadioButtonId();
+    }
+
+    public void setRadioClicked(int id){
+        if(id <= -1)
+            id = 0;
+        RadioGroup radioGroup =  rootView.findViewById(R.id.radio_gender);
+        radioGroup.check(id);
+    }
+
+    public void setTextViewText(String[] texts){
+        EditText fname =  rootView.findViewById(R.id.first_name);
+        EditText lname =  rootView.findViewById(R.id.last_name);
+        EditText contact =  rootView.findViewById(R.id.contact);
+        EditText email =  rootView.findViewById(R.id.email);
+        EditText age =  rootView.findViewById(R.id.age);
+        fname.setText(texts[0]);
+        lname.setText(texts[1]);
+        contact.setText(texts[2]);
+        email.setText(texts[3]);
+        age.setText(texts[4]);
     }
 
     public void onClick(View view) {

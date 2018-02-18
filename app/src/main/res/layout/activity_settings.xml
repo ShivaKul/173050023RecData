@@ -27,7 +27,7 @@
         android:showDividers="middle"
         android:divider="@drawable/divider_drawable">
 
-        <CheckBox android:id="@+id/checkbox_meat"
+        <CheckBox android:id="@+id/checkbox_accelerometer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/accel"
@@ -35,7 +35,7 @@
             android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
             android:layout_weight="1"/>
 
-        <CheckBox android:id="@+id/checkbox_cheese"
+        <CheckBox android:id="@+id/checkbox_GPS"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/gps"

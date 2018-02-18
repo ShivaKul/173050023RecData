@@ -1,6 +1,7 @@
 package com.example.shiva.a173050023recdata;
 
 import android.app.Fragment;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     private  int lastTab = 0;
+    private final String PREFS_NAME = "my_pref";
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
@@ -69,12 +71,42 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public void loadSettingsFrag()
+    {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
+        if(pref.contains("acc"))
+        {
+            boolean options[] = {pref.getBoolean("acc", false), pref.getBoolean("gps", false)};
+            Settings settingsFrag = (Settings) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + 1);
+            settingsFrag.setOptions(options);
+        }
+    }
+    public void loadLoginFrag()
+    {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
+        if(pref.contains("fname"))
+        {
+            String texts[] = {pref.getString("fname", null), pref.getString("lname", null), pref.getString("contact", null), pref.getString("email", null), pref.getString("age", null)};
+            int radioID = pref.getInt("gender", 0);
+            LoginTab loginFrag = (LoginTab) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + 0);
+            loginFrag.setTextViewText(texts);
+            loginFrag.setRadioClicked(radioID);
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        final EditText fname =  findViewById(R.id.first_name);
+        final EditText lname =  findViewById(R.id.last_name);
+        final EditText contact =  findViewById(R.id.contact);
+        final EditText email =  findViewById(R.id.email);
+        final RadioGroup radioGroup =  findViewById(R.id.radio_gender);
+        final EditText age =  findViewById(R.id.age);
+
 
         final TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Login"));
@@ -102,7 +134,22 @@ public class MainActivity extends AppCompatActivity {
                     tabLayout.getTabAt(0).select();
                 }
                 else
+                {
+                    LoginTab loginFrag = (LoginTab) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + 0);
+                    String[] texts = loginFrag.getTextViewText();
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
+                    SharedPreferences.Editor editor = pref.edit();
+
+                    editor.putString("fname", texts[0]);
+                    editor.putString("lname", texts[1]);
+                    editor.putString("contact", texts[2]);
+                    editor.putString("email", texts[3]);
+                    editor.putString("age", texts[4]);
+                    editor.putInt("gender", loginFrag.getRadioClicked());
+                    editor.commit();
+
                     tabLayout.getTabAt(position).select();
+                }
             }
 
             @Override
@@ -117,6 +164,19 @@ public class MainActivity extends AppCompatActivity {
                     viewPager.setCurrentItem(tab.getPosition());
                 else
                 {
+                    LoginTab loginFrag = (LoginTab) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + 0);
+                    String[] texts = loginFrag.getTextViewText();
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
+                    SharedPreferences.Editor editor = pref.edit();
+
+                    editor.putString("fname", texts[0]);
+                    editor.putString("lname", texts[1]);
+                    editor.putString("contact", texts[2]);
+                    editor.putString("email", texts[3]);
+                    editor.putString("age", texts[4]);
+                    editor.putInt("gender", loginFrag.getRadioClicked());
+                    editor.commit();
+
                     tab = tabLayout.getTabAt(lastTab);
                     tab.select();
                 }
@@ -137,17 +197,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //int id = item.getItemId();
-        //if (id == R.id.action_settings) {
-        //    return true;
-        //}
-
         return super.onOptionsItemSelected(item);
     }
     public void goToRecord(View view){

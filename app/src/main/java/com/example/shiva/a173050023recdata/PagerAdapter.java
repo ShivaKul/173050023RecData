@@ -3,7 +3,6 @@ package com.example.shiva.a173050023recdata;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class PagerAdapter extends FragmentPagerAdapter {
     int mNumOfTabs;
