@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">173050023RecData</string>
+    <string name="login">Login</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="sensor_options">Sensor Options</string>
+    <string name="accel">Accelerometer</string>
+    <string name="gps">GPS</string>
+    <string name="login_instructions">Please fill the form, and then navigate to other screens via the spinner at the top, or the record button.</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="others">Others</string>
+    <string name="contact">Contact</string>
+    <string name="email">E-mail</string>
+    <string name="age">Age</string>
+    <string name="gender">Gender</string>
+    <string name="previous_timestamps">List of previous recorded timestamps</string>
+</resources>

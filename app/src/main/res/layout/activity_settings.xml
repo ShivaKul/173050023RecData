@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sensor_options"
+        android:textSize="24sp"
+        android:id="@+id/heading_textview"
+        android:gravity="center"
+        android:layout_below="@+id/action_bar"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/heading_textview"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="175dp"
+        android:paddingLeft="75dp"
+        android:paddingRight="75dp"
+        android:showDividers="middle"
+        android:divider="@drawable/divider_drawable">
+
+        <CheckBox android:id="@+id/checkbox_meat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/accel"
+            android:button="@null"
+            android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+            android:layout_weight="1"/>
+
+        <CheckBox android:id="@+id/checkbox_cheese"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gps"
+            android:button="@null"
+            android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+</RelativeLayout>
