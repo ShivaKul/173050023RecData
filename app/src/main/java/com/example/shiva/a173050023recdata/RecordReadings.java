@@ -1,26 +1,70 @@
 package com.example.shiva.a173050023recdata;
 
+import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-public class RecordReadings extends Service implements SensorEventListener {
-    private static final String DEBUG_TAG = "RecordReadingsService";
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
 
-    private SensorManager sensorManager = null;
-    private Sensor sensor = null;
+public class RecordReadings extends Service implements SensorEventListener, LocationListener {
+    private static final String DEBUG_TAG = "RecordReadingsService";
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60;
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
+    private double accelx;
+    private double accely;
+    private double accelz;
+    private double lat;
+    private double lon;
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        Sensor sensorAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, sensorAccel, SensorManager.SENSOR_DELAY_NORMAL);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        String provider = LocationManager.NETWORK_PROVIDER;
+        try
+        {
+            Location location = locationManager.getLastKnownLocation(provider);
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+            Log.v(DEBUG_TAG, "No location permit");
+        }
         return START_STICKY;
     }
 
@@ -36,17 +80,84 @@ public class RecordReadings extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         // grab the values and timestamp -- off the main thread
-        new SensorEventLoggerTask().execute(event);
+        accelx = event.values[0];
+        accely = event.values[1];
+        accelz = event.values[2];
+        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz).execute();
         // stop the service
         //stopSelf();
     }
 
-    private class SensorEventLoggerTask extends AsyncTask<SensorEvent, Void, Void> {
+    @Override
+    public void onLocationChanged(Location location) {
+        lat = location.getLatitude();
+        lon = location.getLongitude();
+        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz).execute();
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
+
+    private class SensorEventLoggerTask extends AsyncTask<Void, Void, Void> {
+        private double accelx;
+        private double accely;
+        private double accelz;
+        private double lat;
+        private double lon;
+        SensorEventLoggerTask(double lat, double lon, double accelx, double accely, double accelz)
+        {
+            this.lat = lat;
+            this.lon = lon;
+            this.accelx = accelx;
+            this.accelx = accely;
+            this.accelx = accelz;
+        }
         @Override
-        protected Void doInBackground(SensorEvent... events) {
-            SensorEvent event = events[0];
+        protected Void doInBackground(Void... params) {
             // log the value
-            Log.v("Service", "Hello");
+            if(!isExternalStorageWritable())
+            {
+                Log.v(DEBUG_TAG, "External storage not writeable");
+                return null;
+            }
+            File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "Readings");
+            if (!folder.exists())
+            {
+                Log.v(DEBUG_TAG, "Folder doesn't exist");
+                if (!folder.mkdir())
+                {
+                    Log.v(DEBUG_TAG, "Couldn't create folder" + folder.mkdir());
+                    return null;
+                }
+            }
+            String filename = folder.toString() + File.separator + "Test.csv";
+            Log.v(DEBUG_TAG, "Path is: " + filename);
+            try
+            {
+                FileWriter writer = new FileWriter(filename);
+                writer.write("first name,last name,mobile,email,gender,age\n");
+                writer.write("lat,long,accelx,accely,accelz\n");
+                writer.flush();
+                writer.write(lat + "," + lon + "," +  accelx + "," +  accely+ "," +  accelz + "\n");
+                writer.close();
+            }
+            catch (IOException e)
+            {
+                Log.v(DEBUG_TAG, "IOException encountered " + Arrays.toString(e.getStackTrace()));
+            }
+
             return null;
         }
     }

@@ -1,5 +1,6 @@
 package com.example.shiva.a173050023recdata;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -30,7 +31,9 @@ public class Record extends Fragment {
         Switch switch_r= (Switch) rootView.findViewById(R.id.switch_toggle);
         switch_r.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Intent intent = new Intent(getActivity().getApplicationContext(), RecordReadings.class );
                 if (isChecked) {
+                    getActivity().startService(intent);
                     Long tsLong = System.currentTimeMillis() / 1000;
                     String ts = tsLong.toString();
                     if(listTimeStamps.size() > 4)
@@ -38,6 +41,7 @@ public class Record extends Fragment {
                     listTimeStamps.add(ts);
                 }
                 else{
+                    getActivity().stopService(intent);
                     adapter.notifyDataSetChanged();
                 }
             }
