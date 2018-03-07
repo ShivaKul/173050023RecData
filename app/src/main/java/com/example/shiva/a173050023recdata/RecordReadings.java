@@ -63,18 +63,22 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
         Sensor sensorAccel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensorAccel, SensorManager.SENSOR_DELAY_NORMAL);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        if (!isNetworkEnabled) {
+            Log.v(DEBUG_TAG, "Network not enabled");
+            return START_NOT_STICKY;
+        }
         Criteria criteria = new Criteria();
-        String provider = LocationManager.NETWORK_PROVIDER;
-        try
-        {
-            Location location = locationManager.getLastKnownLocation(provider);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        String provider = LocationManager.GPS_PROVIDER;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.v(DEBUG_TAG, "No GPS Permission");
+            return  START_NOT_STICKY;
         }
-        catch (SecurityException e)
-        {
-            e.printStackTrace();
-            Log.v(DEBUG_TAG, "No location permit");
-        }
+        Location location = locationManager.getLastKnownLocation(provider);
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+
+
         return START_NOT_STICKY;
     }
 
@@ -90,6 +94,7 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
     @Override
     public void onSensorChanged(SensorEvent event) {
         // grab the values and timestamp -- off the main thread
+        //Log.v(DEBUG_TAG, "onSensorChanged fired");
         accelx = event.values[0];
         accely = event.values[1];
         accelz = event.values[2];
