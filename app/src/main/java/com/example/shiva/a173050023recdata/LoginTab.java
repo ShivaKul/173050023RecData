@@ -2,6 +2,7 @@ package com.example.shiva.a173050023recdata;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ public class LoginTab extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setRetainInstance(true);
         rootView =  inflater.inflate(R.layout.activity_login_tab, container, false);
         rootView.findViewById(R.id.male).setOnClickListener(this);
         rootView.findViewById(R.id.female).setOnClickListener(this);

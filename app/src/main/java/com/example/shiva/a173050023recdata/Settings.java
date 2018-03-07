@@ -20,6 +20,7 @@ public class Settings extends Fragment {
     View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setRetainInstance(true);
         rootView =  inflater.inflate(R.layout.activity_settings, container, false);
         final CheckBox acc = rootView.findViewById(R.id.checkbox_accelerometer);
         final CheckBox gps = rootView.findViewById(R.id.checkbox_GPS);

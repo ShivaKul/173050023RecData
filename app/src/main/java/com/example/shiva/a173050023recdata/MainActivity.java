@@ -71,6 +71,17 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    public void loadRecordingFrag()
+    {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
+        if(pref.contains("recordChecked"))
+        {
+            boolean checked = pref.getBoolean("recordChecked", false);
+            String label = pref.getString("label", null);
+            Record recordFrag= (Record) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + 2);
+            recordFrag.setRecordLabelChecked(checked, label);
+        }
+    }
     public void loadSettingsFrag()
     {
         SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);

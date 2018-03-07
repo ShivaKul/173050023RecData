@@ -16,4 +16,5 @@
     <string name="age">Age</string>
     <string name="gender">Gender</string>
     <string name="previous_timestamps">List of previous recorded timestamps</string>
+    <string name="label">Label</string>
 </resources>
