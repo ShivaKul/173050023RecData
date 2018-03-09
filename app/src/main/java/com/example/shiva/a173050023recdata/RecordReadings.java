@@ -39,7 +39,7 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
     private SensorManager sensorManager;
     private LocationManager locationManager;
     private String filename = null;
-
+    private String csvName = null;
     @Override
     public void onDestroy() {
         Log.v(DEBUG_TAG, "Service destroy called");
@@ -47,6 +47,8 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
         sensorManager.unregisterListener(this);
         super.onDestroy();
     }
+
+
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -94,7 +96,7 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
     @Override
     public void onSensorChanged(SensorEvent event) {
         // grab the values and timestamp -- off the main thread
-        //Log.v(DEBUG_TAG, "onSensorChanged fired");
+        Log.v(DEBUG_TAG, "onSensorChanged fired");
         accelx = event.values[0];
         accely = event.values[1];
         accelz = event.values[2];
@@ -102,19 +104,24 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
         String ts = tsLong.toString();
         SharedPreferences pref = getSharedPreferences("my_pref", 0);
         String label = pref.getString("label", null);
-        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz, firstEntry, ts, label).execute();
+        if(firstEntry)
+            csvName = ts;
+        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz, firstEntry, ts, label, csvName).execute();
         firstEntry = false;
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.v(DEBUG_TAG, "onLocationChanged fired");
         lat = location.getLatitude();
         lon = location.getLongitude();
         Long tsLong = System.currentTimeMillis() / 1000;
         String ts = tsLong.toString();
         SharedPreferences pref = getSharedPreferences("my_pref", 0);
         String label = pref.getString("label", null);
-        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz, firstEntry, ts, label).execute();
+        if(firstEntry)
+            csvName = ts;
+        new SensorEventLoggerTask(lat, lon, accelx, accely, accelz, firstEntry, ts, label, csvName).execute();
         firstEntry = false;
     }
 
@@ -142,7 +149,9 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
         private boolean firstEntry;
         private String ts;
         private String label;
-        SensorEventLoggerTask(double lat, double lon, double accelx, double accely, double accelz, boolean firstEntry, String ts, String label)
+        private String csvName;
+
+        SensorEventLoggerTask(double lat, double lon, double accelx, double accely, double accelz, boolean firstEntry, String ts, String label, String csvName)
         {
             this.lat = lat;
             this.lon = lon;
@@ -152,6 +161,7 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
             this.firstEntry = firstEntry;
             this.ts = ts;
             this.label = label;
+            this.csvName = csvName;
         }
         @Override
         protected Void doInBackground(Void... params) {
@@ -172,24 +182,42 @@ public class RecordReadings extends Service implements SensorEventListener, Loca
                 }
             }
             if(filename == null)
-                filename = folder.toString() + File.separator + ts + ".csv";
+                filename = folder.toString() + File.separator + csvName + ".csv";
             Log.v(DEBUG_TAG, "Path is: " + filename);
             try
             {
-                FileWriter writer = new FileWriter(filename, true);
+                FileWriter writer = null;
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("my_pref", 0);
                 if(firstEntry)
                 {
+                    writer = new FileWriter(filename);
                     writer.write(pref.getString("fname", null) + pref.getString("lname", null) + "," + pref.getString("contact", null) + "," + pref.getString("email", null) + "," + pref.getInt("gender", 0) + "," + pref.getString("age", null) + "\n");
                     writer.write("timestamp,lat,long,accelx,accely,accelz,label\n");
                     writer.flush();
+                    writer.close();
                 }
+                writer = new FileWriter(filename, true);
+                writer.write(ts + "," + lat + "," + lon + "," +  accelx + "," +  accely+ "," +  accelz + "," + label + "\n");
+                writer.close();
+                File folder_vis = new File(Environment.getExternalStorageDirectory() + File.separator + "Readings");
+                String filename_vis = folder_vis.toString() + File.separator + csvName + ".csv";
+                File path = new File(folder_vis.toString());
+                path.mkdirs();
+                if(firstEntry)
+                {
+                    writer = new FileWriter(filename_vis);
+                    writer.write(pref.getString("fname", null) + pref.getString("lname", null) + "," + pref.getString("contact", null) + "," + pref.getString("email", null) + "," + pref.getInt("gender", 0) + "," + pref.getString("age", null) + "\n");
+                    writer.write("timestamp,lat,long,accelx,accely,accelz,label\n");
+                    writer.flush();
+                    writer.close();
+                }
+                writer = new FileWriter(filename_vis, true);
                 writer.write(ts + "," + lat + "," + lon + "," +  accelx + "," +  accely+ "," +  accelz + "," + label + "\n");
                 writer.close();
             }
             catch (IOException e)
             {
-                Log.v(DEBUG_TAG, "IOException encountered " + Arrays.toString(e.getStackTrace()));
+                Log.v(DEBUG_TAG, "IOException encountered " + e.getMessage());
             }
 
             return null;

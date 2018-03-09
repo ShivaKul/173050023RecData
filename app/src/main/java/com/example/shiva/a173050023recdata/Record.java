@@ -1,7 +1,9 @@
 package com.example.shiva.a173050023recdata;
 
+import android.*;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -31,7 +33,24 @@ public class Record extends Fragment {
         EditText labelField = rootView.findViewById(R.id.labelField);
         labelField.setText(label);
     }
-
+    private boolean checkWriteExternalPermission()
+    {
+        String permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        int res = getContext().checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
+    private boolean checkFineLocationPermission()
+    {
+        String permission = android.Manifest.permission.ACCESS_FINE_LOCATION;
+        int res = getContext().checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
+    private boolean checkCoarseLocationPermission()
+    {
+        String permission = android.Manifest.permission.ACCESS_COARSE_LOCATION;
+        int res = getContext().checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -56,6 +75,13 @@ public class Record extends Fragment {
                     if(labelField.getText().toString().length() == 0)
                     {
                         Toast.makeText(getActivity(), "Please enter a label.", Toast.LENGTH_SHORT).show();
+                        Switch toggle = rootView.findViewById(R.id.switch_toggle);
+                        toggle.setChecked(false);
+                        return;
+                    }
+                    if(!checkCoarseLocationPermission() || !checkFineLocationPermission() || !checkWriteExternalPermission())
+                    {
+                        Toast.makeText(getActivity(), "Please grant location and storage permissions.", Toast.LENGTH_SHORT).show();
                         Switch toggle = rootView.findViewById(R.id.switch_toggle);
                         toggle.setChecked(false);
                         return;
